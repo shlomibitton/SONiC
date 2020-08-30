@@ -262,7 +262,7 @@ There are 4 severity levels a "health" event can get:
 * Warning
 * Notice
 
-1.During dump taking SDK is **blocked**, thus no events can arrive during this operation.
+1. During dump taking SDK is **blocked**, thus no events can arrive during this operation.
 
 2. If the user request for a dump and at the same time a FW dump is being taken, a proper message will display and the dump taking by the user will result as failure.
 The same result will be for a user requesting for a dump after a FW fatal event occur.
