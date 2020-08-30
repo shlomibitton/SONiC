@@ -30,7 +30,7 @@
     - [3.8.1 Enabled/disable FW Dump Me feature](#381-enableddisable-fw-dump-me-feature)
   - [3.9 FW Dump Me daemon](#39-fw-dump-me-daemon)
     - [3.9.1 Main thread](#391-main-thread)
-    - [3.9.2 Use-Cases](#391-use-cases)
+    - [3.9.2 Use-Cases](#392-use-cases)
     - [3.9.3 FW Dump Me communication with CLI](#393-fw-dump-me-communication-with-cli)
   - [3.10 Integration to "show techsupport" command](#310-integration-to-show-techsupport-command)
 - [4 Flows](#4-flows)
