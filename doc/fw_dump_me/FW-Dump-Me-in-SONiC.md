@@ -30,7 +30,8 @@
     - [3.8.1 Enabled/disable FW Dump Me feature](#381-enableddisable-fw-dump-me-feature)
   - [3.9 FW Dump Me daemon](#39-fw-dump-me-daemon)
     - [3.9.1 Main thread](#391-main-thread)
-    - [3.9.2 FW Dump Me communication with CLI](#392-fw-dump-me-communication-with-cli)
+    - [3.9.2 Use-Cases](#391-use-cases)
+    - [3.9.3 FW Dump Me communication with CLI](#393-fw-dump-me-communication-with-cli)
   - [3.10 Integration to "show techsupport" command](#310-integration-to-show-techsupport-command)
 - [4 Flows](#4-flows)
   - [4.1 FW dump taking logic "trap handling"](#41-fw-dump-taking-logic-trap-handling)
@@ -252,17 +253,31 @@ Aug 13 09:03:17.429153 r-tigon-04 INFO fw-dump-me#fw_dumpd: Dump taking started,
 Aug 13 09:03:17.429153 r-tigon-04 INFO fw-dump-me#fw_dumpd: Dump taking finished, File path: /var/log/mellanox/fw_dump_r-tigon-04_20200813_013434
 Aug 13 09:03:17.429153 r-tigon-04 ERR fw-dump-me#fw_dumpd: Dump taking failed, Cause: "Timeout reached"
 ```
-**Note**:
+
+### 3.9.2 Use-Cases
+
+There are 4 severity levels a "health" event can get:
+* Critical
+* Error
+* Warning
+* Notice
+
 1.During dump taking SDK is **blocked**, thus no events can arrive during this operation.
+
 2. If the user request for a dump and at the same time a FW dump is being taken, a proper message will display and the dump taking by the user will result as failure.
 The same result will be for a user requesting for a dump after a FW fatal event occur.
+
 3. After each event, when a dump taking is finished, a "re-arm" operation will enable recieving more "health" events and generate more dumps.
 But, if the trigger was by the FW as a result of a fatal case the daemon will log the events, if there are any, and **skip** the dump generation.
-4. The decision to take a dump will be by the 'severity' of the event. In this case the SDK will be blocked only if it is "severe enough".
+
+4. The decision to take a dump will be by the 'severity' of the event. In this case the SDK will be blocked only if it is "severe enough" ('critical' and 'error' levels).
+For 'warning' and 'notice' a log entry will be added but no dump.
+
 5. The number of dumps will be limited to X dumps to avoid any scenario of dump request flood.
+
 6. The number of log entries will be limited to X to avoid log flooding.
 
-### 3.9.2 FW Dump Me communication with CLI
+### 3.9.3 FW Dump Me communication with CLI
 
 In order to not produce additional load in Redis DB or bringing another Redis instance specifically for FW Dump Me another IPC mechanism will be used.
 A suggested alternative is a Unix domain socket. It may be placed under */var/run/fw-dump-me/dump.sock* which will be mapped to FW Dump Me container.
