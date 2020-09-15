@@ -330,3 +330,13 @@ in such a case a log error will be added.
 
 ![FW Dump Me init flow](/doc/fw_dump_me/init.svg)
 
+# 5 Manual testing plan
+
+| Test name              | Description                                                                                          |
+|------------------------|------------------------------------------------------------------------------------------------------|
+| test_user_request      | This test will check if user request for a dump functionality is working.                            |
+| test_fw_fatal_event    | This test will check if FW fatal event triggering a dump and avoiding further dump taking requests.  |
+| test_sdk_sever_event   | This test will check if SDK health event is triggering a dump taking functionality.                  |
+| test_sdk_normal_event  | This test will check if a not sever SDK health event is logged and a system dump is skipped.         |
+| test_config_reload     | This test will check if reloading configuration not breaking the feature functionality.              |
+| test_reboot            | This test will check if rebooting the switch is not breaking the feature functionality.              |
