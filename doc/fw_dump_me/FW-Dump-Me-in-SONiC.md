@@ -274,9 +274,13 @@ But, if the trigger was by the FW as a result of a fatal case the daemon will lo
 4. The decision to take a dump will be by the 'severity' of the event. In this case the SDK will be blocked only if it is "severe enough" ('critical' and 'error' levels).
 For 'warning' and 'notice' a log entry will be added but no dump.
 
-5. The number of dumps will be limited to X dumps to avoid any scenario of dump request flood.
+5. If the event requires taking a dump, FW dump will be taken first as this is real time sensitive.
+A delay of 1-2 seconds will start to allow the SDK continue working and avoid blocking for too long period.
+After this delay a SDK dump will be triggered.
 
-6. The number of log entries will be limited to X to avoid log flooding.
+6. The number of dumps will be limited to X dumps to avoid any scenario of dump request flood.
+
+7. The number of log entries will be limited to X to avoid log flooding.
 
 ### 3.9.3 FW Dump Me communication with CLI
 
