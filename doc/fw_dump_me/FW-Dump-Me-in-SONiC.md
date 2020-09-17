@@ -39,6 +39,7 @@
   - [4.3 SDK trap generation](#43-sdk-trap-generation)
   - [4.4 Error flow - Dump taking failed (or timed out)](#44-error-flow---dump-taking-failed-or-timed-out)
   - [4.5 FW Dump Me init flow](#45-fw-dump-me-init-flow)
+- [5 Manual testing plan](#5-manual-testing-plan)
 
 # List of Tables
 * [Table 1: Abbreviations](#definitionsabbreviation)
@@ -296,7 +297,23 @@ A considerable timeout has to be set on socket so that send/recv will not block 
 
 ## 3.10 Integration to "show techsupport" command
 
-Running the "show techsupport" command will trigger a new dump taking and include it in the output file.
+As mentioned before, this feature is disabled by default, thus the "show techsupport" will not include a FW dump if it is not enabled before running the command.
+
+Running the "show techsupport" command when this feature is enabled will trigger a new dump taking and include it in the output file.
+
+```
+drwxr-xr-x  2 root root  4096 Sep 17 08:41 core
+drwxr-xr-x  2 root root 12288 Sep 17 08:41 dump
+drwxr-xr-x 77 root root  4096 Sep 17 04:47 etc
+drwxr-xr-x  2 root root  4096 Sep 17 08:42 fw_dump   <-----
+-rwxr-xr-x  1 root root 17946 Sep 16 00:13 generate_dump
+drwxr-xr-x  2 root root  4096 Sep 17 08:41 hw-mgmt
+drwxr-xr-x  2 root root  4096 Sep 17 08:41 log
+drwxr-xr-x  2 root root  4096 Sep 17 08:41 mstdump
+drwxr-xr-x  4 root root  4096 Sep 17 04:55 proc
+drwxr-xr-x  2 root root  4096 Sep 17 08:41 sai_sdk_dump
+
+```
 
 # 4 Flows
 
