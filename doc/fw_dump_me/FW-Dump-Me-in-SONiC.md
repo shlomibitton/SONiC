@@ -20,24 +20,23 @@
   - [2.1 Functional requirements](#21-functional-requirements)
 - [3 Modules design](#3-modules-design)
   - [3.1 FW Dump Me build and runtime dependencies](#31-fw-dump-me-build-and-runtime-dependencies)
-  - [3.2 FW Dump Me docker container in SONiC](#32-fw-dump-me-docker-container-in-sonic)
+  - [3.2 FW Dump Me daemon in SONiC](#32-fw-dump-me-daemon-in-sonic)
   - [3.3 FW Dump Me in SONiC overview](#33-fw-dump-me-in-sonic-overview)
-  - [3.4 FW Dump Me service in SONiC](#34-fw-dump-me-service-in-sonic)
-  - [3.5 FW Dump Me feature table](#35-fw-dump-me-feature-table)
-  - [3.6 FW Dump Me provided data](#36-fw-dump-me-provided-data)
-  - [3.7 FW Dump Me output file](#37-fw-dump-me-output-file)
-  - [3.8 CLI](#38-cli)
-    - [3.8.1 Enabled/disable FW Dump Me feature](#381-enableddisable-fw-dump-me-feature)
-  - [3.9 FW Dump Me daemon](#39-fw-dump-me-daemon)
-    - [3.9.1 Main thread](#391-main-thread)
-    - [3.9.2 FW Dump Me communication with CLI](#392-fw-dump-me-communication-with-cli)
-  - [3.10 Integration to "show techsupport" command](#310-integration-to-show-techsupport-command)
+  - [3.4 FW Dump Me provided data](#34-fw-dump-me-provided-data)
+  - [3.5 FW Dump Me output file](#35-fw-dump-me-output-file)
+  - [3.6 CLI](#36-cli)
+  - [3.7 FW Dump Me daemon](#37-fw-dump-me-daemon)
+    - [3.7.1 Main thread](#371-main-thread)
+    - [3.7.2 Use-Cases](#372-use-cases)
+    - [3.7.3 FW Dump Me communication with CLI](#373-fw-dump-me-communication-with-cli)
+  - [3.8 Integration to "show techsupport" command](#38-integration-to-show-techsupport-command)
 - [4 Flows](#4-flows)
   - [4.1 FW dump taking logic "trap handling"](#41-fw-dump-taking-logic-trap-handling)
   - [4.2 FW trap generation](#42-fw-trap-generation)
   - [4.3 SDK trap generation](#43-sdk-trap-generation)
   - [4.4 Error flow - Dump taking failed (or timed out)](#44-error-flow---dump-taking-failed-or-timed-out)
   - [4.5 FW Dump Me init flow](#45-fw-dump-me-init-flow)
+- [5 Manual testing plan](#5-manual-testing-plan)
 
 # List of Tables
 * [Table 1: Abbreviations](#definitionsabbreviation)
@@ -77,8 +76,8 @@ FW Dump Me feature gives the user a way to generate a full FW dump, even if the 
 
 FW Dump Me feature in SONiC should meet the following high-level functional requirements:
 
-- FW Dump Me feature provides functionality as a seperate docker container built in Mellanox SONiC image.
-- FW Dump Me feature is optional in SONiC, thus can be enabled or disabled per user request at runtime.
+- FW Dump Me feature provides functionality as an additional daemon running within syncd container.
+- FW Dump Me feature is a dubugging tool in SONiC for Mellanox customers and it is enabled by default.
 - FW Dump Me will create the dump by three possible cases:
   - FW originated trap.
   - SDK originated trap.
@@ -90,17 +89,10 @@ FW Dump Me feature in SONiC should meet the following high-level functional requ
 
 ####################################
 
-## 3.2 FW Dump Me docker container in SONiC
+## 3.2 FW Dump Me daemon in SONiC
 
-A new docker image will be built for mellanox target called "docker-fw-dump-me" and included in Mellanox SONiC build by default.<p>
+A new daemon will be added to 'syncd' container and will be included in Mellanox SONiC build by default.<p>
 Build rules for FW Dump Me docker will reside under *platform/mellanox/docker-fw-dump-me.mk*.
-
-```
-admin@sonic:~$ docker ps
-CONTAINER ID        IMAGE                                COMMAND                  CREATED             STATUS              PORTS               NAMES
-...
-2b199b2309f9        docker-fw-dump-me:latest             "/usr/bin/supervisord"   17 hours ago        Up 11 hours                             docker-fw-dump-me
-```
 
 * SDK Unix socket needs to be mapped to container (for CLI support).
 * */var/log/mellanox/* mounted inside container (used for writing dump files)
@@ -110,87 +102,30 @@ CONTAINER ID        IMAGE                                COMMAND                
 
 ![FW Dump Me in SONiC overview](/doc/fw_dump_me/overview.svg)
 
-## 3.4 FW Dump Me service in SONiC
+## 3.4 FW Dump Me provided data
 
-A corresponding service file has to be created to manage the lifetime and dependencies of FW Dump Me docker container.
-
-FW Dump Me service, as an SDK-dependent service, should have a hard requirement for syncd service, so it will be started, restarted, stopped when syncd service is.
-
-The following systemd unit configurations and dependencies will be set:
-
-```
-Requiers=updategraph.service swss.service syncd.service
-After=updategraph.service syncd.service swss.service
-Before=ntpconfig.service
-StartLimitIntervalSec=1200
-StartLimitBurst=3
-```
-
-The following service settings will be set:
-
-```
-Restart=always
-RestartSec=30
-```
-
-Thus, the service is configured to be restarted in case of a failure. If the service was autorestarted 3 times within 20 minutes the service will fail.
-
-## 3.5 FW Dump Me feature table
-
-Community [introduced](https://github.com/Azure/SONiC/blob/master/doc/Optional-Feature-Control.md) a way to enable/disable optional features at runtime and provided a seperate **FEATURE** table in CONFIG DB.
-
-```
-admin@sonic:~$ show features 
-Feature               Status
--------------------   --------
-telemetry             enabled
-fw-dump-me            enabled
-```
-
-```
-admin@sonic:~$ sudo config feature fw-dump-me [enabled|disabled]
-```
-
-The above config command translates into:
-
-enabled command:
-```
-sudo systemctl enable fw-dump-me
-sudo systemctl start fw-dump-me
-```
-
-disabled command:
-```
-sudo systemctl stop fw-dump-me
-sudo systemctl disable fw-dump-me
-```
-
-By default FW Dump Me feature will be disabled.
-
-## 3.6 FW Dump Me provided data
-
-- The generating cause & time (the cause of the “FW dump me now trap” or the reason the high level decided to take the dump).
+- The generating cause, severity & time (the cause of the “FW dump me now trap” or the reason the high level decided to take the dump).
 - FW trace, I.E the FW configuration done to the HW from the beginning of time (boot). 
 - GDB core files of all irisc’s.
 - As much of the CR space according to priority defined in the ADB file.
 - SDK dump.
 
-## 3.7 FW Dump Me output file
+## 3.5 FW Dump Me output file
 
-The output file will be generated in "/var/log/mellanox/fw_dump" if triggered by FW or SDK cause.
+The FW output files will be generated in "/var/log/mellanox/fw_dump_me" if triggered by FW or SDK cause.
 If the user will trigger the dump taking, it will be generated under the path provided by the user.
 If no path provided, the default location will be used.
-The new dump file name will be: <device_id>/<module_name>_<time_stamp>
+The new dump files name will be: <device_id>/<module_name>_<time_stamp>
 
-The SDK dump will output file will be generated in "/var/log/mellanox/sniffer".
+The SDK dump output file will be generated in "/var/log/mellanox/fw_dump_me".
 
-## 3.8 CLI
+## 3.6 CLI
 
-Since the FW Dump Me daemon is running on a seperate container, CLI will be provided by an additional thread communicating with the host with a socket. The thread is running on the docker, recieve and process requests from the host to trigger dump generating.
+Since the FW Dump Me daemon is running on a seperate container (syncd), CLI will be provided by an additional thread communicating with the host with a socket. The thread is running on the docker, recieve and process requests from the host to trigger dump generating.
 
-The command to create a new dump:
+Command to create a new dump:
 ```
-admin@sonic:~$ show platform mlnx fw-dump <desired_path>
+admin@sonic:~$ show platform mlnx fw-dump-me <desired_path>
 ```
 CLI output examples:
 ```
@@ -219,26 +154,10 @@ Finished successfully
 Output = /var/log/mellanox/fw_dump/fw_dump_r-tigon-04_20200813_013434
 admin@sonic:~$
 ```
-### 3.8.1 Enabled/disable FW Dump Me feature
 
-Already implemented as part of "optional features" feature:
+## 3.7 FW Dump Me daemon
 
-Config CLI:
-```
-admin@sonic:~$ config feature fw-dump-me [enabled|disabled]
-```
-Show CLI:
-```
-admin@sonic:~$ show features 
-Feature               Status
--------------------   --------
-telemetry             enabled
-fw-dump-me            enabled
-```
-
-## 3.9 FW Dump Me daemon
-
-### 3.9.1 Main thread
+### 3.7.1 Main thread
 
 The main thread will register to the relevant trap group and listen to events generated by FW/SDK/User.
 Upon event arrival, a proper message will be logged in the system log containing all event information.
@@ -247,25 +166,44 @@ The dump will be automaticaly generated on event.
 Log messages example as they appear on 'systemlog':
 
 ```
-Aug 13 09:03:17.429153 r-tigon-04 INFO fw-dump-me#fw_dumpd: Dump taking started, Cause: "register: XXX gobit not cleared"
-Aug 13 09:03:17.429153 r-tigon-04 INFO fw-dump-me#fw_dumpd: Dump taking started, Cause: "register: XXX failed, FW RC: YYY"
-Aug 13 09:03:17.429153 r-tigon-04 INFO fw-dump-me#fw_dumpd: Dump taking finished, File path: /var/log/mellanox/fw_dump_r-tigon-04_20200813_013434
-Aug 13 09:03:17.429153 r-tigon-04 ERR fw-dump-me#fw_dumpd: Dump taking failed, Cause: "Timeout reached"
+Sep 30 13:15:42.525034 arc-switch1038 INFO supervisord: fwdumpd Health event captured, Severity: 'Notice' Cause: 'FW health issue'
+Sep 30 13:15:42.525034 arc-switch1038 INFO supervisord: fwdumpd Dump taking started, Severity: 'Notice' Cause: 'FW health issue'
+Sep 30 13:15:42.525034 arc-switch1038 INFO supervisord: fwdumpd Dump taking started, Severity: 'Notice' Cause: 'gobit not cleared'
+Sep 30 13:15:42.525034 arc-switch1038 INFO supervisord: fwdumpd Dump taking finished, File path: /var/log/mellanox/fw_dump_r-tigon-04_20200813_013434
+Sep 30 13:15:42.525034 arc-switch1038 INFO supervisord: fwdumpd Dump taking failed, Timeout reached
 ```
-**Note**:
-1.During dump taking SDK is **blocked**, thus no events can arrive during this operation.
+
+### 3.7.2 Use-Cases
+
+There are 4 severity levels a "health" event can get:
+* Critical
+* Error
+* Warning
+* Notice
+
+1. During dump taking SDK is **blocked**, thus no events can arrive during this operation.
+
 2. If the user request for a dump and at the same time a FW dump is being taken, a proper message will display and the dump taking by the user will result as failure.
 The same result will be for a user requesting for a dump after a FW fatal event occur.
+
 3. After each event, when a dump taking is finished, a "re-arm" operation will enable recieving more "health" events and generate more dumps.
 But, if the trigger was by the FW as a result of a fatal case the daemon will log the events, if there are any, and **skip** the dump generation.
-4. The decision to take a dump will be by the 'severity' of the event. In this case the SDK will be blocked only if it is "severe enough".
-5. The number of dumps will be limited to X dumps to avoid any scenario of dump request flood.
-6. The number of log entries will be limited to X to avoid log flooding.
 
-### 3.9.2 FW Dump Me communication with CLI
+4. The decision to take a dump will be by the 'severity' of the event. In this case the SDK will be blocked only if it is "severe enough" ('critical' and 'error' levels).
+For 'warning' and 'notice' a log entry will be added but no dump.
 
-In order to not produce additional load in Redis DB or bringing another Redis instance specifically for FW Dump Me another IPC mechanism will be used.
-A suggested alternative is a Unix domain socket. It may be placed under */var/run/fw-dump-me/dump.sock* which will be mapped to FW Dump Me container.
+5. If the event requires taking a dump, FW dump will be taken first as this is real time sensitive.
+A delay of 1-2 seconds will start to allow the SDK continue working and avoid blocking for too long period.
+After this delay a SDK dump will be triggered.
+
+6. The number of dumps will be limited to X dumps to avoid any scenario of dump request flood.
+
+7. The number of log entries will be limited to X to avoid log flooding.
+
+### 3.7.3 FW Dump Me communication with CLI
+
+In order to avoid producing additional load in Redis DB or bringing another Redis instance specifically for FW Dump Me another IPC mechanism will be used.
+A suggested alternative is a Unix domain socket. It may be placed under */var/run/fw-dump-me/dump.sock* which will be mapped to syncd container.
 
 On CLI request FW Dump Me daemon trigger dump generation from FW and save it on the requested path.
 
@@ -279,9 +217,22 @@ Since the design is focused on one CLI client, only one connection will be handl
 
 A considerable timeout has to be set on socket so that send/recv will not block CLI or daemon if one side unexpectedly terminates.
 
-## 3.10 Integration to "show techsupport" command
+## 3.8 Integration to "show techsupport" command
 
 Running the "show techsupport" command will trigger a new dump taking and include it in the output file.
+
+```
+drwxr-xr-x  2 root root  4096 Sep 17 08:41 core
+drwxr-xr-x  2 root root 12288 Sep 17 08:41 dump
+drwxr-xr-x 77 root root  4096 Sep 17 04:47 etc
+drwxr-xr-x  2 root root  4096 Sep 17 08:42 fw_dump   <-----
+-rwxr-xr-x  1 root root 17946 Sep 16 00:13 generate_dump
+drwxr-xr-x  2 root root  4096 Sep 17 08:41 hw-mgmt
+drwxr-xr-x  2 root root  4096 Sep 17 08:41 log
+drwxr-xr-x  2 root root  4096 Sep 17 08:41 mstdump
+drwxr-xr-x  4 root root  4096 Sep 17 04:55 proc
+drwxr-xr-x  2 root root  4096 Sep 17 08:41 sai_sdk_dump
+```
 
 # 4 Flows
 
@@ -315,3 +266,17 @@ in such a case a log error will be added.
 
 ![FW Dump Me init flow](/doc/fw_dump_me/init.svg)
 
+# 5 Manual testing plan
+
+All test cases will run on all asics SPC1-3.
+
+| Test name                | Description                                                                                                                    |
+|--------------------------|--------------------------------------------------------------------------------------------------------------------------------|
+| test_cli_request         | This test will check if user request(cli) for a dump functionality is working.                                                 |
+| test_fw_fatal_event      | This test will check if FW fatal event triggering a dump and avoiding further dump taking requests.                            |
+| test_sdk_sever_event     | This test will check if SDK health event is triggering a dump taking functionality.                                            |
+| test_sdk_normal_event    | This test will check if a not sever SDK health event is logged and a system dump is skipped.                                   |
+| test_config_reload       | This test will check if reloading configuration not breaking the feature functionality.                                        |
+| test_reboot              | This test will check if rebooting the switch is not breaking the feature functionality (will include fast/warm reboot also).   |
+| test_cpu_mem_performance | This test will check CPU and Memory consumption.                                                                               |
+| test_cli_time            | This test will check how long a CLI execution and dump taking of FW and SDK cost.                                              |
