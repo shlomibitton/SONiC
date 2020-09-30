@@ -100,7 +100,7 @@ Build rules for FW Dump Me docker will reside under *platform/mellanox/docker-fw
 
 ## 3.3 FW Dump Me in SONiC overview 
 
-![FW Dump Me in SONiC overview](/doc/fw_dump_me/overview.svg)
+![FW Dump Me in SONiC overview](/doc/fw_dump_me/overview_syncd.svg)
 
 ## 3.4 FW Dump Me provided data
 
@@ -264,7 +264,7 @@ in such a case a log error will be added.
 
 ## 4.5 FW Dump Me init flow
 
-![FW Dump Me init flow](/doc/fw_dump_me/init.svg)
+![FW Dump Me init flow](/doc/fw_dump_me/init_syncd.svg)
 
 # 5 Manual testing plan
 
