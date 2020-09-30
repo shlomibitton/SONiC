@@ -169,7 +169,7 @@ Log messages example as they appear on 'systemlog':
 Sep 30 13:15:42.525034 arc-switch1038 INFO supervisord: fwdumpd Health event captured, Severity: 'Notice' Cause: 'FW health issue'
 Sep 30 13:15:42.525034 arc-switch1038 INFO supervisord: fwdumpd Dump taking started, Severity: 'Notice' Cause: 'FW health issue'
 Sep 30 13:15:42.525034 arc-switch1038 INFO supervisord: fwdumpd Dump taking started, Severity: 'Notice' Cause: 'gobit not cleared'
-Sep 30 13:15:42.525034 arc-switch1038 INFO supervisord: fwdumpd Dump taking finished, File path: /var/log/mellanox/fw_dump_r-tigon-04_20200813_013434
+Sep 30 13:15:42.525034 arc-switch1038 INFO supervisord: fwdumpd Dump taking finished, File path: /var/log/mellanox/fw_dump_me_arc-switch1038_20200813_013434
 Sep 30 13:15:42.525034 arc-switch1038 INFO supervisord: fwdumpd Dump taking failed, Timeout reached
 ```
 
