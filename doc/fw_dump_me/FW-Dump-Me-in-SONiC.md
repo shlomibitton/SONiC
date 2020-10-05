@@ -76,7 +76,7 @@ FW Dump Me feature gives the user a way to generate a full FW dump, even if the 
 
 FW Dump Me feature in SONiC should meet the following high-level functional requirements:
 
-- FW Dump Me feature provides functionality as an additional daemon running within syncd container.
+- FW Dump Me feature provides functionality as an additional daemon running within mellanox syncd container.
 - FW Dump Me feature is a dubugging tool in SONiC for Mellanox customers and it is enabled by default.
 - FW Dump Me will create the dump by three possible cases:
   - FW originated trap.
@@ -91,7 +91,7 @@ FW Dump Me feature in SONiC should meet the following high-level functional requ
 
 ## 3.2 FW Dump Me daemon in SONiC
 
-A new daemon will be added to 'syncd' container and will be included in Mellanox SONiC build by default.<p>
+A new daemon will be added to mellanox 'syncd' container and will be included in Mellanox SONiC build by default.<p>
 Build rules for FW Dump Me docker will reside under *platform/mellanox/docker-fw-dump-me.mk*.
 
 * SDK Unix socket needs to be mapped to container (for CLI support).
@@ -121,7 +121,7 @@ The SDK dump output file will be generated in "/var/log/mellanox/fw_dump_me".
 
 ## 3.6 CLI
 
-Since the FW Dump Me daemon is running on a seperate container (syncd), CLI will be provided by an additional thread communicating with the host with a socket. The thread is running on the docker, recieve and process requests from the host to trigger dump generating.
+Since the FW Dump Me daemon is running on a seperate container (syncd), CLI will be provided by an additional process communicating with the daemon with a socket. The CLI will start by sending a command with the host CLI ('show' script), it will recieve and send the requests to the daemon to trigger dump generating.
 
 Command to create a new dump:
 ```
@@ -166,11 +166,11 @@ The dump will be automaticaly generated on event.
 Log messages example as they appear on 'systemlog':
 
 ```
-Sep 30 13:15:42.525034 arc-switch1038 INFO supervisord: fwdumpd Health event captured, Severity: 'Notice' Cause: 'FW health issue'
-Sep 30 13:15:42.525034 arc-switch1038 INFO supervisord: fwdumpd Dump taking started, Severity: 'Notice' Cause: 'FW health issue'
-Sep 30 13:15:42.525034 arc-switch1038 INFO supervisord: fwdumpd Dump taking started, Severity: 'Notice' Cause: 'gobit not cleared'
-Sep 30 13:15:42.525034 arc-switch1038 INFO supervisord: fwdumpd Dump taking finished, File path: /var/log/mellanox/fw_dump_me_arc-switch1038_20200813_013434
-Sep 30 13:15:42.525034 arc-switch1038 INFO supervisord: fwdumpd Dump taking failed, Timeout reached
+Sep 30 13:15:42.525034 arc-switch1038 NOTICE fwdumpd: :- handle_sdk_health_event: Health event captured, Severity: 'Notice' Cause: 'FW health issue'
+Sep 30 13:15:42.525034 arc-switch1038 NOTICE fwdumpd: :- handle_sdk_health_event: Dump taking started, Severity: 'Notice' Cause: 'FW health issue'
+Sep 30 13:15:42.525034 arc-switch1038 NOTICE fwdumpd: :- handle_sdk_health_event: Dump taking started, Severity: 'Notice' Cause: 'gobit not cleared'
+Sep 30 13:15:42.525034 arc-switch1038 NOTICE fwdumpd: :- handle_sdk_health_event: Dump taking finished, File path: /var/log/mellanox/fw_dump_me_arc-switch1038_20200813_013434
+Sep 30 13:15:42.525034 arc-switch1038 NOTICE fwdumpd: :- handle_sdk_health_event: Dump taking failed, Timeout reached
 ```
 
 ### 3.7.2 Use-Cases
@@ -220,6 +220,7 @@ A considerable timeout has to be set on socket so that send/recv will not block 
 ## 3.8 Integration to "show techsupport" command
 
 Running the "show techsupport" command will trigger a new dump taking and include it in the output file.
+In addition, it will include the last dump created (if there is one) as it could be a dump created as a result of a real issue.
 
 ```
 drwxr-xr-x  2 root root  4096 Sep 17 08:41 core
