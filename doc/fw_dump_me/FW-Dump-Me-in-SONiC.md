@@ -29,7 +29,8 @@
     - [3.7.1 Main thread](#371-main-thread)
     - [3.7.2 Use-Cases](#372-use-cases)
     - [3.7.3 FW Dump Me communication with CLI](#373-fw-dump-me-communication-with-cli)
-  - [3.8 Integration to "show techsupport" command](#38-integration-to-show-techsupport-command)
+  - [3.8 Events types](#38-events-types)
+  - [3.9 Integration to "show techsupport" command](#39-integration-to-show-techsupport-command)
 - [4 Flows](#4-flows)
   - [4.1 FW dump taking logic "trap handling"](#41-fw-dump-taking-logic-trap-handling)
   - [4.2 FW trap generation](#42-fw-trap-generation)
@@ -175,30 +176,17 @@ Sep 30 13:15:42.525034 arc-switch1038 NOTICE fwdumpd: :- handle_sdk_health_event
 
 ### 3.7.2 Use-Cases
 
-There are 4 severity levels a "health" event can get:
-* Critical
-* Error
-* Warning
-* Notice
-
 1. During dump taking SDK is **blocked**, thus no events can arrive during this operation.
 
 2. If the user request for a dump and at the same time a FW dump is being taken, a proper message will display and the dump taking by the user will result as failure.
-The same result will be for a user requesting for a dump after a FW fatal event occur.
 
-3. After each event, when a dump taking is finished, a "re-arm" operation will enable recieving more "health" events and generate more dumps.
-But, if the trigger was by the FW as a result of a fatal case the daemon will log the events, if there are any, and **skip** the dump generation.
+3. If the user request for a dump after a FW event occur and a dump already taken, a proper message will display and the dump taking by the user will result as failure.
 
-4. The decision to take a dump will be by the 'severity' of the event. In this case the SDK will be blocked only if it is "severe enough" ('critical' and 'error' levels).
-For 'warning' and 'notice' a log entry will be added but no dump.
+4. If a FW event occur and a dump taken, the daemon will log all events from this point, if there are any, and **skip** the dump generation.
 
-5. If the event requires taking a dump, FW dump will be taken first as this is real time sensitive.
-A delay of 1-2 seconds will start to allow the SDK continue working and avoid blocking for too long period.
-After this delay a SDK dump will be triggered.
+5. The number of dumps will be limited to X dumps to avoid any scenario of dump request flood.
 
-6. The number of dumps will be limited to X dumps to avoid any scenario of dump request flood.
-
-7. The number of log entries will be limited to X to avoid log flooding.
+6. The number of log entries will be limited to X to avoid log flooding.
 
 ### 3.7.3 FW Dump Me communication with CLI
 
@@ -217,7 +205,21 @@ Since the design is focused on one CLI client, only one connection will be handl
 
 A considerable timeout has to be set on socket so that send/recv will not block CLI or daemon if one side unexpectedly terminates.
 
-## 3.8 Integration to "show techsupport" command
+## 3.8 Events types
+
+There are 4 severity levels a "health" event can get:
+* Critical
+* Error
+* Warning
+* Notice
+
+There are 4 causes a "health" event can get:
+* FW health issue
+* SDK go bit not cleared
+* command interface completion timeout
+* timeout in FW response
+
+## 3.9 Integration to "show techsupport" command
 
 Running the "show techsupport" command will trigger a new dump taking and include it in the output file.
 In addition, it will include the last dump created (if there is one) as it could be a dump created as a result of a real issue.
