@@ -108,7 +108,7 @@ Build rules for Dump Me Now debian package will reside under *platform/mellanox/
 
 - The generating cause, severity & time (the cause of the “dump me now trap” or the reason the high level decided to take the dump).
 - As much of the CR space according to priority defined in the ADB file.
-- SDK dump.
+- SDK dump.   
 **In the future:**
 - FW trace, I.E the FW configuration done to the HW from the beginning of time (boot). 
 - GDB core files of all irisc’s.
