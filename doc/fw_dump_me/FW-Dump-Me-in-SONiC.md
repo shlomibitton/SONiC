@@ -23,7 +23,7 @@
   - [3.2 Dump Me Now daemon in SONiC](#32-dump-me-now-daemon-in-sonic)
   - [3.3 Dump Me Now in SONiC overview](#33-dump-me-now-in-sonic-overview)
   - [3.4 Dump Me Now provided data](#34-dump-me-now-provided-data)
-  - [3.5 Dump Me Now output files](#35-dump-me-now-output-file)
+  - [3.5 Dump Me Now output files](#35-dump-me-now-output-files)
   - [3.6 CLI](#36-cli)
   - [3.7 Dump Me Now daemon](#37-dump-me-now-daemon)
     - [3.7.1 Main thread](#371-main-thread)
@@ -117,8 +117,8 @@ Build rules for Dump Me Now debian package will reside under *platform/mellanox/
 
 ## 3.5 Dump Me Now output files
 
-CR/FW/GDB/SDK output files will be generated in "*/var/log/mellanox/dump_me_now*" if triggered by FW or SDK cause.
-If the user will trigger the dump (show techsupport), it will be generated in "*/var/dump*" directory under sai_sdk directory
+CR space/FW trace/GDB files/SDK output files will be generated in "*/var/log/mellanox/dump_me_now*" if triggered by FW or SDK cause.   
+If the user will trigger the dump (show techsupport), it will be generated in "*/var/dump*" directory under sai_sdk directory.   
 The new dump files name will be: <module_name>_<time_stamp>
 
 ## 3.6 CLI
