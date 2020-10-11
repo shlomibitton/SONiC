@@ -135,7 +135,6 @@ FW Dump Me
 path  = "/var/log/mellanox/example"
 Generating dump...
 Finished successfully 
-Output = /var/log/mellanox/example/fw_dump_r-tigon-04_20200813_013434
 admin@sonic:~$
 ```
 ```
@@ -152,7 +151,6 @@ FW Dump Me
 path  = "/var/log/mellanox/fw_dump"
 Generating dump...
 Finished successfully 
-Output = /var/log/mellanox/fw_dump/fw_dump_r-tigon-04_20200813_013434
 admin@sonic:~$
 ```
 
