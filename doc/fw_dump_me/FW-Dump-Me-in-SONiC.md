@@ -187,6 +187,13 @@ There are 4 causes a "health" event can get:
 * command interface completion timeout
 * timeout in FW response
 
+| Casue                                | Severity  | Description / Log                                   | Action requirment                                                  |
+|--------------------------------------|-----------|-----------------------------------------------------|--------------------------------------------------------------------|
+| FW health issue                      | Critical  | Some log                                            | Some action                                                        |
+| SDK go bit not cleared               | Error     | Some log                                            | Some action                                                        |
+| command interface completion timeout | Warning   | Some log                                            | Some action                                                        |
+| timeout in FW response               | Notice    | Some log                                            | Some action                                                        |
+
 ## 3.9 Integration to "show techsupport" command
 
 Running the "show techsupport" command will trigger the SAI API to generate, in addition to the SDK dump, additional ASIC component dumps.   
