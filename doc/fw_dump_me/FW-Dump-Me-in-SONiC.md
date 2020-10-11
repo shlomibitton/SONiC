@@ -220,7 +220,10 @@ There are 4 causes a "health" event can get:
 ## 3.9 Integration to "show techsupport" command
 
 Running the "show techsupport" command will trigger a new dump taking and include it in the output file.
-In addition, it will include the last dump created (if there is one) as it could be a dump created as a result of a real issue.
+In addition, it will include all the dumps created (if there are any) as it could be dumps created as a result of a real issue.
+For example, if a FW event occur some other events might happen on SDK as a result of this FW issue.
+In this case the first dump is the most important one and it should be included, regardless of other dumps taken.
+The amount of dumps on the disk will be limited to X too prevent large disk usage. 
 
 ```
 drwxr-xr-x  2 root root  4096 Sep 17 08:41 core
