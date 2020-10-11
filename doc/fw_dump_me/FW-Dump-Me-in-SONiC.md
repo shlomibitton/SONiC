@@ -69,6 +69,7 @@ This document describes the high level design of the Dump Me Now feature in SONi
 # 1. Overview
 
 Dump Me Now feature gives the user a way to observe interrupts asserted from lower layers (SDK/FW).
+
 When such interrupt occur, all ASIC component dumps will be created even if the FW is stuck, as such we would like to "communicate" directly with the HW and not use the FW to get the info.
 The first release will include SDK and CR space dumps, in the future GDB core files and FW trace will be provided as well.
 
