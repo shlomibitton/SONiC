@@ -93,7 +93,7 @@ FW Dump Me feature in SONiC should meet the following high-level functional requ
 ## 3.2 FW Dump Me daemon in SONiC
 
 A new daemon will be added to mellanox 'syncd' container and will be included in Mellanox SONiC build by default.<p>
-Build rules for FW Dump Me docker will reside under *platform/mellanox/docker-fw-dump-me.mk*.
+Build rules for FW Dump Me docker will reside under *platform/mellanox/mlnx-fw-dump-me.mk*.
 
 * SDK Unix socket needs to be mapped to container (for CLI support).
 * */var/log/mellanox/* mounted inside container (used for writing dump files)
