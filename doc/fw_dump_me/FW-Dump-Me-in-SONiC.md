@@ -28,15 +28,14 @@
   - [3.7 Dump Me Now daemon](#37-dump-me-now-daemon)
     - [3.7.1 Main thread](#371-main-thread)
     - [3.7.2 Use-Cases](#372-use-cases)
-    - [3.7.3 FW Dump Me communication with CLI](#373-fw-dump-me-communication-with-cli)
   - [3.8 Events types](#38-events-types)
   - [3.9 Integration to "show techsupport" command](#39-integration-to-show-techsupport-command)
 - [4 Flows](#4-flows)
-  - [4.1 FW dump taking logic "trap handling"](#41-fw-dump-taking-logic-trap-handling)
+  - [4.1 Dump taking logic "trap handling"](#41-dump-taking-logic-trap-handling)
   - [4.2 FW trap generation](#42-fw-trap-generation)
   - [4.3 SDK trap generation](#43-sdk-trap-generation)
   - [4.4 Error flow - Dump taking failed (or timed out)](#44-error-flow---dump-taking-failed-or-timed-out)
-  - [4.5 FW Dump Me init flow](#45-fw-dump-me-init-flow)
+  - [4.5 Dump Me Now init flow](#45-dump-me-now-init-flow)
 - [5 Manual testing plan](#5-manual-testing-plan)
 
 # List of Tables
