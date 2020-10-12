@@ -42,9 +42,9 @@
 * [Table 1: Abbreviations](#definitionsabbreviation)
 
 # List of Figures
-* [Dump Me Now in SONiC overview](#33-fw-dump-me-in-sonic-overview)
+* [Dump Me Now in SONiC overview](#33-dump-me-now-in-sonic-overview)
 * [Dump Me Now general flow](#4-flows)
-* [FW Dump Me init flow](#45-fw-dump-me-init-flow)
+* [Dump Me Now init flow](#45-dump-me-now-init-flow)
 
 # Revision
 | Rev | Date     | Author          | Change Description                 |
